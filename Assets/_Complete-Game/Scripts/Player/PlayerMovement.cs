@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnitySampleAssets.CrossPlatformInput;
 
 namespace CompleteProject
@@ -11,6 +12,10 @@ namespace CompleteProject
         Vector3 movement;                   // The vector to store the direction of the player's movement.
         Animator anim;                      // Reference to the animator component.
         Rigidbody playerRigidbody;          // Reference to the player's rigidbody.
+        PlayerShooting playerShooting;
+
+
+
 #if !MOBILE_INPUT
         int floorMask;                      // A layer mask so that a ray can be cast just at gameobjects on the floor layer.
         float camRayLength = 100f;          // The length of the ray from the camera into the scene.
@@ -26,6 +31,7 @@ namespace CompleteProject
             // Set up references.
             anim = GetComponent <Animator> ();
             playerRigidbody = GetComponent <Rigidbody> ();
+            playerShooting = GetComponentInChildren<PlayerShooting>();
         }
 
 
@@ -112,6 +118,28 @@ namespace CompleteProject
 
             // Tell the animator whether or not the player is walking.
             anim.SetBool ("IsWalking", walking);
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.gameObject.tag == "CoinSpeed")
+            {
+                Destroy(other.gameObject, 0);
+                speed += 3;
+                StartCoroutine(highSpeedTime());
+            }
+            else if (other.gameObject.tag == "CoinDame")
+            {
+                Destroy(other.gameObject, 0);
+                playerShooting.damagePerShot += 80;
+            }
+            else return;
+        }
+
+        IEnumerator highSpeedTime()
+        {
+            yield return new WaitForSeconds (0.6f);
+            speed -= 3;
         }
     }
 }

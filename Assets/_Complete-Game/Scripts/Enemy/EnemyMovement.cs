@@ -9,7 +9,7 @@ namespace CompleteProject
         PlayerHealth playerHealth;      // Reference to the player's health.
         EnemyHealth enemyHealth;        // Reference to this enemy's health.
         UnityEngine.AI.NavMeshAgent nav;               // Reference to the nav mesh agent.
-
+        Animator anim;                              // Reference to the animator.
 
         void Awake ()
         {
@@ -18,8 +18,8 @@ namespace CompleteProject
             playerHealth = player.GetComponent <PlayerHealth> ();
             enemyHealth = GetComponent <EnemyHealth> ();
             nav = GetComponent <UnityEngine.AI.NavMeshAgent> ();
+            anim = GetComponent<Animator>();
         }
-
 
         void Update ()
         {
@@ -27,7 +27,21 @@ namespace CompleteProject
             if(enemyHealth.currentHealth > 0 && playerHealth.currentHealth > 0)
             {
                 // ... set the destination of the nav mesh agent to the player.
-                nav.SetDestination (player.position);
+                float dEnm_player = (player.position.x - this.transform.position.x) * (player.position.x - this.transform.position.x) +
+                                    (player.position.y - this.transform.position.y) * (player.position.y - this.transform.position.y);
+
+                if (dEnm_player < 40)
+                {
+                    nav.SetDestination (player.position);
+                    anim.SetBool("IsWalking", true);
+                }
+
+
+                else
+                {
+                    //nav.enabled = false;
+                    anim.SetBool("IsWalking", false);
+                }
             }
             // Otherwise...
             else
