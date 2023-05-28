@@ -1,19 +1,19 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnitySampleAssets.CrossPlatformInput;
-
+using Photon.Pun;
 namespace CompleteProject
 {
-    public class PlayerMovement : MonoBehaviour
+    public class PlayerMovement : MonoBehaviourPunCallbacks
     {
         public float speed = 6f;            // The speed that the player will move at.
-
+        public Camera cameraFollow;
+        public Transform player;
 
         Vector3 movement;                   // The vector to store the direction of the player's movement.
         Animator anim;                      // Reference to the animator component.
         Rigidbody playerRigidbody;          // Reference to the player's rigidbody.
         PlayerShooting playerShooting;
-
 
 
 #if !MOBILE_INPUT
@@ -29,14 +29,15 @@ namespace CompleteProject
 #endif
 
             // Set up references.
-            anim = GetComponent <Animator> ();
-            playerRigidbody = GetComponent <Rigidbody> ();
+            anim = GetComponentInChildren<Animator> ();
+            playerRigidbody = GetComponentInChildren<Rigidbody> ();
             playerShooting = GetComponentInChildren<PlayerShooting>();
         }
 
 
         void FixedUpdate ()
         {
+            if (!photonView.IsMine) return;
             // Store the input axes.
             float h = CrossPlatformInputManager.GetAxisRaw("Horizontal");
             float v = CrossPlatformInputManager.GetAxisRaw("Vertical");
@@ -61,7 +62,7 @@ namespace CompleteProject
             movement = movement.normalized * speed * Time.deltaTime;
 
             // Move the player to it's current position plus the movement.
-            playerRigidbody.MovePosition (transform.position + movement);
+            playerRigidbody.MovePosition(player.position + movement);
         }
 
 
@@ -69,7 +70,7 @@ namespace CompleteProject
         {
 #if !MOBILE_INPUT
             // Create a ray from the mouse cursor on screen in the direction of the camera.
-            Ray camRay = Camera.main.ScreenPointToRay (Input.mousePosition);
+            Ray camRay = cameraFollow.ScreenPointToRay(Input.mousePosition);
 
             // Create a RaycastHit variable to store information about what was hit by the ray.
             RaycastHit floorHit;
@@ -78,7 +79,7 @@ namespace CompleteProject
             if(Physics.Raycast (camRay, out floorHit, camRayLength, floorMask))
             {
                 // Create a vector from the player to the point on the floor the raycast from the mouse hit.
-                Vector3 playerToMouse = floorHit.point - transform.position;
+                Vector3 playerToMouse = floorHit.point - player.position;
 
                 // Ensure the vector is entirely along the floor plane.
                 playerToMouse.y = 0f;

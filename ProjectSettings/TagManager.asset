@@ -6,6 +6,7 @@ TagManager:
   tags:
   - CoinSpeed
   - CoinDame
+  - Player1
   layers:
   - Default
   - TransparentFX

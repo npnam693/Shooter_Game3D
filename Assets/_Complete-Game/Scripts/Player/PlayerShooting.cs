@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+﻿using Photon.Pun;
+using UnityEngine;
 using UnitySampleAssets.CrossPlatformInput;
-
+using Photon.Pun;
 namespace CompleteProject
 {
-    public class PlayerShooting : MonoBehaviour
+    public class PlayerShooting : MonoBehaviourPunCallbacks
     {
         public int damagePerShot = 20;                  // The damage inflicted by each bullet.
         public float timeBetweenBullets = 0.15f;        // The time between each shot.
@@ -38,6 +39,8 @@ namespace CompleteProject
 
         void Update ()
         {
+            if (!photonView.IsMine) return;
+
             // Add the time since Update was last called to the timer.
             timer += Time.deltaTime;
 
