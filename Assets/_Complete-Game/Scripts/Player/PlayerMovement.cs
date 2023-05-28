@@ -31,7 +31,7 @@ namespace CompleteProject
             // Set up references.
             anim = GetComponentInChildren<Animator> ();
             playerRigidbody = GetComponentInChildren<Rigidbody> ();
-            playerShooting = GetComponentInChildren<PlayerShooting>();
+            //playerShooting = GetComponentInChildren<PlayerShooting>();
         }
 
 
@@ -39,6 +39,7 @@ namespace CompleteProject
         {
             if (!photonView.IsMine) return;
             // Store the input axes.
+
             float h = CrossPlatformInputManager.GetAxisRaw("Horizontal");
             float v = CrossPlatformInputManager.GetAxisRaw("Vertical");
 
@@ -132,7 +133,7 @@ namespace CompleteProject
             else if (other.gameObject.tag == "CoinDame")
             {
                 Destroy(other.gameObject, 0);
-                playerShooting.damagePerShot += 80;
+                //playerShooting.damagePerShot += 80;
             }
             else return;
         }

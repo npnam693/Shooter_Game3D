@@ -33,8 +33,8 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        base.OnJoinedRoom();
         StartGame();
+        base.OnJoinedRoom();
     }
 
     public void StartGame()

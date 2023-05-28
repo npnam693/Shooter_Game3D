@@ -17,7 +17,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     
     public void Spawn()
     {
-        PhotonNetwork.Instantiate("Player", SpawnPoint.position, SpawnPoint.rotation);
+        PhotonNetwork.Instantiate("Player0", SpawnPoint.position, SpawnPoint.rotation);
     }
     
     void Update()
