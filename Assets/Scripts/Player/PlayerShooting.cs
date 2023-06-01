@@ -23,6 +23,7 @@ public class PlayerShooting : MonoBehaviour
         shootableMask = LayerMask.GetMask ("Shootable");
         gunParticles = GetComponent<ParticleSystem> ();
         gunLine = GetComponent <LineRenderer> ();
+        // gunLine = GetComponent <LineRenderer2> ();
         gunAudio = GetComponent<AudioSource> ();
         gunLight = GetComponent<Light> ();
     }
