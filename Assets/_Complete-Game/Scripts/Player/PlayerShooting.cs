@@ -1,15 +1,14 @@
 ﻿using Photon.Pun;
 using UnityEngine;
 using UnitySampleAssets.CrossPlatformInput;
-using Photon.Pun;
 namespace CompleteProject
 {
-    public class PlayerShooting : MonoBehaviourPunCallbacks
+    public class PlayerShooting : MonoBehaviourPunCallbacks, IPunObservable
     {
         public int damagePerShot = 20;                  // The damage inflicted by each bullet.
-        public float timeBetweenBullets = 0.15f;        // The time between each shot.
+        public float timeBetweenBullets = 0.3f;        // The time between each shot.
         public float range = 100f;                      // The distance the gun can fire.
-
+        public GameObject player;
 
         float timer;                                    // A timer to determine when to fire.
         Ray shootRay = new Ray();                       // A ray from the gun end forwards.
@@ -21,36 +20,45 @@ namespace CompleteProject
         Light gunLight;                                 // Reference to the light component.
 		public Light faceLight;							// Duh
         float effectsDisplayTime = 0.2f;                // The proportion of the timeBetweenBullets that the effects will display for.
+        bool IsFiring = false;
+
+
 
 
         void Awake ()
         {
             // Create a layer mask for the Shootable layer.
             shootableMask = LayerMask.GetMask ("Shootable");
-
             // Set up the references.
             gunParticles = GetComponent<ParticleSystem> ();
             gunLine = GetComponent <LineRenderer> ();
             gunAudio = GetComponent<AudioSource> ();
             gunLight = GetComponent<Light> ();
-			//faceLight = GetComponentInChildren<Light> ();
+            faceLight = GetComponentInChildren<Light> ();
         }
 
 
         void Update ()
         {
-            if (!photonView.IsMine) return;
 
             // Add the time since Update was last called to the timer.
             timer += Time.deltaTime;
+            
+            if (timer >= timeBetweenBullets * effectsDisplayTime && IsFiring)
+            {
+                // ... disable the effects.
+                DisableEffects();
+            }
 
+            if (!photonView.IsMine) return;
 #if !MOBILE_INPUT
             // If the Fire1 button is being press and it's time to fire...
-			if(Input.GetButton ("Fire1") && timer >= timeBetweenBullets && Time.timeScale != 0)
+            if (Input.GetButton ("Fire1") && timer >= timeBetweenBullets && Time.timeScale != 0 && !IsFiring)
             {
                 // ... shoot the gun.
-                Shoot ();
+                Shoot();
             }
+
 #else
             // If there is input on the shoot direction stick and it's time to fire...
             if ((CrossPlatformInputManager.GetAxisRaw("Mouse X") != 0 || CrossPlatformInputManager.GetAxisRaw("Mouse Y") != 0) && timer >= timeBetweenBullets)
@@ -60,25 +68,23 @@ namespace CompleteProject
             }
 #endif
             // If the timer has exceeded the proportion of timeBetweenBullets that the effects should be displayed for...
-            if(timer >= timeBetweenBullets * effectsDisplayTime)
-            {
-                // ... disable the effects.
-                DisableEffects ();
-            }
+
         }
 
 
         public void DisableEffects ()
         {
             // Disable the line renderer and the light.
+            if (IsFiring) IsFiring = false;
+
             gunLine.enabled = false;
 			faceLight.enabled = false;
             gunLight.enabled = false;
         }
 
-
         void Shoot ()
         {
+            if (!IsFiring) IsFiring = true;
             // Reset the timer.
             timer = 0f;
 
@@ -111,11 +117,12 @@ namespace CompleteProject
                 if(enemyHealth != null)
                 {
                     // ... the enemy should take damage.
-                    enemyHealth.TakeDamage (damagePerShot, shootHit.point);
+                    enemyHealth.TakeDamage (damagePerShot, shootHit.point, player);
                 }
 
                 // Set the second position of the line renderer to the point the raycast hit.
                 gunLine.SetPosition (1, shootHit.point);
+
             }
             // If the raycast didn't hit anything on the shootable layer...
             else
@@ -124,5 +131,20 @@ namespace CompleteProject
                 gunLine.SetPosition (1, shootRay.origin + shootRay.direction * range);
             }
         }
+
+        #region IPunObservable implementation
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            if (stream.IsWriting)
+            {
+                // We own this player: send the others our data
+                stream.SendNext(IsFiring);
+            }
+            else
+            {
+                if ((bool)stream.ReceiveNext() && !IsFiring) Shoot();
+            }
+        }
+        #endregion
     }
 }

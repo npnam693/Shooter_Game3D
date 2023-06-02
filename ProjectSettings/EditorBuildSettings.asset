@@ -9,9 +9,6 @@ EditorBuildSettings:
     path: Assets/_Complete-Game/Menu.unity
     guid: d3c4085e8368c034993496d6a9b49abc
   - enabled: 1
-    path: Assets/_Complete-Game/_Complete-Game.unity
-    guid: 874e24e631d7345b0a29cc297bedb405
-  - enabled: 1
     path: Assets/_Complete-Game/Test_game.unity
     guid: abca65e42adfa1844856ce2a983e74fe
   m_configObjects: {}

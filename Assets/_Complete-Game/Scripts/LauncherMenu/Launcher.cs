@@ -42,7 +42,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         Debug.Log("hello game");
         if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
         {
-            PhotonNetwork.LoadLevel(2);
+            PhotonNetwork.LoadLevel(1);
         }
     }
 
@@ -51,7 +51,6 @@ public class Launcher : MonoBehaviourPunCallbacks
         Create();
         base.OnJoinRandomFailed(returnCode, message);
     }
-
     public void Create()
     {
         PhotonNetwork.CreateRoom("");

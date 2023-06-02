@@ -25,13 +25,13 @@ namespace CompleteProject
         {
 #if !MOBILE_INPUT
             // Create a layer mask for the floor layer.
-            floorMask = LayerMask.GetMask ("Floor");
+            floorMask = LayerMask.GetMask("Floor");
 #endif
 
             // Set up references.
             anim = GetComponentInChildren<Animator> ();
             playerRigidbody = GetComponentInChildren<Rigidbody> ();
-            //playerShooting = GetComponentInChildren<PlayerShooting>();
+            playerShooting = GetComponentInChildren<PlayerShooting>();
         }
 
 
@@ -75,7 +75,6 @@ namespace CompleteProject
 
             // Create a RaycastHit variable to store information about what was hit by the ray.
             RaycastHit floorHit;
-
             // Perform the raycast and if it hits something on the floor layer...
             if(Physics.Raycast (camRay, out floorHit, camRayLength, floorMask))
             {
@@ -126,21 +125,24 @@ namespace CompleteProject
         {
             if (other.gameObject.tag == "CoinSpeed")
             {
-                Destroy(other.gameObject, 0);
+                //Destroy(other.gameObject, 0);
+                Coin coin = other.gameObject.GetComponent<Coin> ();
+                coin.isHide = true;
                 speed += 3;
-                StartCoroutine(highSpeedTime());
+                //StartCoroutine(highSpeedTime());
             }
             else if (other.gameObject.tag == "CoinDame")
             {
-                Destroy(other.gameObject, 0);
-                //playerShooting.damagePerShot += 80;
+                Coin coin = other.gameObject.GetComponent<Coin> ();
+                coin.isHide = true;
+                playerShooting.damagePerShot += 5;
             }
             else return;
         }
 
         IEnumerator highSpeedTime()
         {
-            yield return new WaitForSeconds (0.6f);
+            yield return new WaitForSeconds (3f);
             speed -= 3;
         }
     }

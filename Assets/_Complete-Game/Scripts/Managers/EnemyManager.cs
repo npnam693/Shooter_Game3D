@@ -1,15 +1,14 @@
 ﻿using UnityEngine;
-
+using Photon.Pun;
 namespace CompleteProject
 {
-    public class EnemyManager : MonoBehaviour
+    public class EnemyManager : MonoBehaviourPunCallbacks
     {
         //public PlayerHealth playerHealth;       // Reference to the player's heatlh.
-        public GameObject enemy;                // The enemy prefab to be spawned.
+        public string enemyPrefab_Name;                // The enemy prefab to be spawned.
         public float spawnTime = 3f;            // How long between each spawn.
         public Transform[] spawnPoints;         // An array of the spawn points this enemy can spawn from.
-
-
+        public int i = 20;
         void Start ()
         {
             // Call the Spawn function after a delay of the spawnTime and then continue to call after the same amount of time.
@@ -25,12 +24,17 @@ namespace CompleteProject
             //    // ... exit the function.
             //    return;
             //}
-
-            // Find a random index between zero and one less than the number of spawn points.
-            int spawnPointIndex = Random.Range (0, spawnPoints.Length);
-
-            // Create an instance of the enemy prefab at the randomly selected spawn point's position and rotation.
-            Instantiate (enemy, spawnPoints[spawnPointIndex].position, spawnPoints[spawnPointIndex].rotation);
+            if (PhotonNetwork.InRoom && PhotonNetwork.PlayerList.Length > 1 && i > 0)
+            {
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    i--;
+                    // Find a random index between zero and one less than the number of spawn points.
+                    int spawnPointIndex = Random.Range(0, spawnPoints.Length);
+                    // Create an instance of the enemy prefab at the randomly selected spawn point's position and rotation.
+                    PhotonNetwork.Instantiate(enemyPrefab_Name, spawnPoints[spawnPointIndex].position, spawnPoints[spawnPointIndex].rotation);
+                }
+            }
         }
     }
 }
