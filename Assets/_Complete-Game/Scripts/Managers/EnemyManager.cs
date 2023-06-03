@@ -8,7 +8,7 @@ namespace CompleteProject
         public string enemyPrefab_Name;                // The enemy prefab to be spawned.
         public float spawnTime = 3f;            // How long between each spawn.
         public Transform[] spawnPoints;         // An array of the spawn points this enemy can spawn from.
-        public int i = 20;
+        public int numSpawn;
         void Start ()
         {
             // Call the Spawn function after a delay of the spawnTime and then continue to call after the same amount of time.
@@ -24,11 +24,11 @@ namespace CompleteProject
             //    // ... exit the function.
             //    return;
             //}
-            if (PhotonNetwork.InRoom && PhotonNetwork.PlayerList.Length > 1 && i > 0)
+            if (PhotonNetwork.InRoom && PhotonNetwork.PlayerList.Length > 1 && numSpawn > 0)
             {
                 if (PhotonNetwork.IsMasterClient)
                 {
-                    i--;
+                    numSpawn--;
                     // Find a random index between zero and one less than the number of spawn points.
                     int spawnPointIndex = Random.Range(0, spawnPoints.Length);
                     // Create an instance of the enemy prefab at the randomly selected spawn point's position and rotation.

@@ -45,7 +45,7 @@ namespace CompleteProject
 
                 if (numUserWin == 2)
                 {
-                    // Setup show win 
+                    anim.SetTrigger("GameWin");
                 }
             }
         }
