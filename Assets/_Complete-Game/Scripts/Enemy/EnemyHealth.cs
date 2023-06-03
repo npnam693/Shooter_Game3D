@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
+using Photon.Pun;
+using System.Security.Cryptography;
 
 namespace CompleteProject
 {
-    public class EnemyHealth : MonoBehaviour
+    public class EnemyHealth : MonoBehaviourPunCallbacks, IPunObservable
     {
         public int startingHealth = 100;            // The amount of health the enemy starts the game with.
         public int currentHealth;                   // The current health the enemy has.
@@ -17,8 +19,6 @@ namespace CompleteProject
         CapsuleCollider capsuleCollider;            // Reference to the capsule collider.
         bool isDead;                                // Whether the enemy is dead.
         bool isSinking;                             // Whether the enemy has started sinking through the floor.
-
-
         void Awake ()
         {
             // Setting up the references.
@@ -29,26 +29,36 @@ namespace CompleteProject
 
             // Setting the current health when the enemy first spawns.
             currentHealth = startingHealth;
+            isDead = false;
+            isSinking = false;
         }
 
 
         void Update ()
         {
+            if (!photonView.IsMine) return;
+            
             // If the enemy should be sinking...
+            if (isDead)
+            {
+                Death();
+            }
+
             if(isSinking)
             {
                 // ... move the enemy down by the sinkSpeed per second.
                 transform.Translate (-Vector3.up * sinkSpeed * Time.deltaTime);
             }
+
         }
 
-
-        public void TakeDamage (int amount, Vector3 hitPoint)
+        public void TakeDamage (int amount, Vector3 hitPoint, GameObject player)
         {
             // If the enemy is dead...
-            if(isDead)
-                // ... no need to take damage so exit the function.
+            if (isDead)
+            {
                 return;
+            }
 
             // Play the hurt sound effect.
             enemyAudio.Play ();
@@ -63,19 +73,19 @@ namespace CompleteProject
             hitParticles.Play();
 
             // If the current health is less than or equal to zero...
-            if(currentHealth <= 0)
+            if(currentHealth <= 0 )
             {
                 // ... the enemy is dead.
-                Death ();
-            }
+                isDead = true;
+
+                ScoreManager playerScore = player.GetComponentInChildren<ScoreManager>();
+                playerScore.AddScore(10);
+            }   
         }
 
 
         void Death ()
         {
-            // The enemy is dead.
-            isDead = true;
-
             // Turn the collider into a trigger so shots can pass through it.
             capsuleCollider.isTrigger = true;
 
@@ -85,13 +95,17 @@ namespace CompleteProject
             // Change the audio clip of the audio source to the death clip and play it (this will stop the hurt clip playing).
             enemyAudio.clip = deathClip;
             enemyAudio.Play ();
+
+            StartSinking();
         }
 
 
         public void StartSinking ()
         {
+            Debug.Log("Thuc hien ham StartSinking");
+
             // Find and disable the Nav Mesh Agent.
-            GetComponent <UnityEngine.AI.NavMeshAgent> ().enabled = false;
+            GetComponent<UnityEngine.AI.NavMeshAgent> ().enabled = false;
 
             // Find the rigidbody component and make it kinematic (since we use Translate to sink the enemy).
             GetComponent <Rigidbody> ().isKinematic = true;
@@ -99,11 +113,24 @@ namespace CompleteProject
             // The enemy should no sink.
             isSinking = true;
 
-            // Increase the score by the enemy's score value.
-            ScoreManager.score += scoreValue;
+            //// Increase the score by the enemy's score value.
+            //ScoreManager.score += scoreValue;
 
             // After 2 seconds destory the enemy.
-            Destroy (gameObject, 2f);
+            Destroy (gameObject, 1f);
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            if (stream.IsWriting)
+            {
+                stream.SendNext(isDead);
+            }
+            else
+            {
+                if((bool)stream.ReceiveNext())
+                    isDead = true;
+            }
         }
     }
 }

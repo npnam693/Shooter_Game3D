@@ -2,10 +2,12 @@
 using UnityEngine.UI;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using Photon.Pun;
+using System.ComponentModel;
 
 namespace CompleteProject
 {
-    public class PlayerHealth : MonoBehaviour
+    public class PlayerHealth : MonoBehaviourPunCallbacks, IPunObservable
     {
         public int startingHealth = 100;                            // The amount of health the player starts the game with.
         public int currentHealth;                                   // The current health the player has.
@@ -59,6 +61,8 @@ namespace CompleteProject
 
         public void TakeDamage (int amount)
         {
+            if (isDead) return;
+
             // Set the damaged flag so the screen will flash.
             damaged = true;
 
@@ -94,7 +98,7 @@ namespace CompleteProject
             // Set the audiosource to play the death clip and play it (this will stop the hurt sound from playing).
             playerAudio.clip = deathClip;
             playerAudio.Play ();
-
+            playerAudio = GetComponent<AudioSource>();
             // Turn off the movement and shooting scripts.
             playerMovement.enabled = false;
             playerShooting.enabled = false;
@@ -105,6 +109,24 @@ namespace CompleteProject
         {
             // Reload the level that is currently loaded.
             SceneManager.LoadScene (0);
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+
+            if (stream.IsWriting)
+            {
+                stream.SendNext(currentHealth);
+            }
+            else
+            {
+                currentHealth = (int)stream.ReceiveNext();
+                if (currentHealth <= 0 && !isDead)
+                {
+                    // ... it should die.
+                    Death();
+                }
+            }
         }
     }
 }

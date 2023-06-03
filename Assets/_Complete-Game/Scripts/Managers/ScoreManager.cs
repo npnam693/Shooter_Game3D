@@ -7,10 +7,7 @@ namespace CompleteProject
     public class ScoreManager : MonoBehaviour
     {
         public static int score;        // The player's score.
-
-
         Text text;                      // Reference to the Text component.
-
 
         void Awake ()
         {
@@ -19,6 +16,11 @@ namespace CompleteProject
 
             // Reset the score.
             score = 0;
+        }
+
+        public void AddScore(int newScore)
+        {
+            score = score + newScore;
         }
 
 
